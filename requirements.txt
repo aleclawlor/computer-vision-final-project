@@ -1,16 +1,16 @@
 certifi==2021.10.8
 click==8.0.3
 colorama==0.4.4
-Flask @ file:///tmp/build/80754af9/flask_1634118196080/work
+Flask==2.0.2
 gunicorn==20.1.0
-itsdangerous @ file:///tmp/build/80754af9/itsdangerous_1621432558163/work
-Jinja2 @ file:///tmp/build/80754af9/jinja2_1635780242639/work
-MarkupSafe @ file:///C:/ci/markupsafe_1621528502553/work
+itsdangerous==2.0.1
+Jinja2==3.0.2
+MarkupSafe==2.0.1
 mkl-fft==1.3.1
-mkl-random @ file:///C:/ci/mkl_random_1626186184308/work
+mkl-random=1
 mkl-service==2.4.0
-numpy @ file:///C:/ci/numpy_and_numpy_base_1634088717532/work
+numpy==1.21.2
 opencv-python==4.5.4.58
-six @ file:///tmp/build/80754af9/six_1623709665295/work
-Werkzeug @ file:///tmp/build/80754af9/werkzeug_1635505089296/work
+six==1.16.0
+Werkzeug==2.0.2
 wincertstore==0.2
