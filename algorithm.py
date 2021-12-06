@@ -3,7 +3,7 @@
 
 import pandas as pd
 # load the data
-foldername = './dataset-resized/'
+foldername = './data'
 # in pandas, "train" is called a dataframe (e.g., excel table)
 train = pd.read_csv(foldername + 'train.csv')
 # print out the data
