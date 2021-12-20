@@ -1,6 +1,7 @@
 from IPython import get_ipython
+from string import digits
 
-get_ipython().system('pip install ipywidgets')
+# get_ipython().system('pip install ipywidgets')
 
 import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
@@ -12,6 +13,8 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor, Lambda, Compose
 from torch.utils.data import Dataset
 import pandas as pd
+
+torch.cuda.empty_cache()
 
 class TrashDataSet(Dataset):
     def __init__(self, root_dir, df, transforms=None):
@@ -32,7 +35,17 @@ class TrashDataSet(Dataset):
     def __getitem__(self, index):
 
         image = self.file_names[index]
-        img_path = "./data/images/" + self.root_dir + "/" + image
+        
+        # some ugly manual stuff to get the right folder
+        name_split = image.split('.')
+        material = name_split[0]
+        if '_' in material:
+            material = material.split('_')[0]
+
+        remove_digits = str.maketrans('', '', digits)
+        material = material.translate(remove_digits)
+
+        img_path = "./data_augmented/" + material + "/" + "/{}/".format(material) + image
 
         img = Image.open(img_path)
         if self.transforms:
@@ -53,9 +66,9 @@ from torchvision import transforms
 RGB_MEAN = (0.4914, 0.4822, 0.4465)
 RGB_STD = (0.2023, 0.1994, 0.2010)
 
-df_train = pd.read_csv('train.csv')
+df_train = pd.read_csv('./data_augmented/train.csv')
 df_train = df_train.sample(frac=1)
-df_test = pd.read_csv('test.csv')
+df_test = pd.read_csv('./data_augmented/test.csv')
 df_test = df_test.sample(frac=1)
 print(df_test)
 
@@ -77,7 +90,7 @@ training_data = TrashDataSet('train', df_train, transforms=transform_train)
 test_data = TrashDataSet('test', df_test, transforms=transform_test)
 
 
-batch_size = 128
+batch_size = 8
 from PIL import Image
 
 train_dataloader = DataLoader(training_data, batch_size=batch_size)

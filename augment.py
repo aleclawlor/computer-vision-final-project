@@ -29,7 +29,7 @@ def perspective_transform(image):
     points_2 = np.float32([[0, 0], [300, 0], [0, 300], [300, 300]])
 
     perspective_transform = cv2.getPerspectiveTransform(points_1, points_2)
-    transformed = cv2.warpPerspective(image, perspective_transform, (300, 300))
+    transformed = cv2.warpPerspective(image, perspective_transform, (image.shape[1], image.shape[0]))
 
     return transformed
 
@@ -129,7 +129,7 @@ def random_shear(image):
     nW = width + (shear_factor * height)
     
     # perform random shear
-    sheared = cv2.warpAffine(image, M, (int(nW), height))
+    sheared = cv2.warpAffine(image, M, (width, height))
 
     return sheared 
 
