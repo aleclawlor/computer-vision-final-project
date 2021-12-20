@@ -1,48 +1,26 @@
-
-
-
+import torch
+import torch.nn as nn
+import torchvision.models as models
 import pandas as pd
-# load the data
-foldername = './data'
-# in pandas, "train" is called a dataframe (e.g., excel table)
+import torch.nn.functional as F
+import torch.optim as optim
+import numpy as np
+from torch.utils.data import Dataset, DataLoader
+from PIL import Image
+from torchvision import transforms
+
+# load the data and training
+foldername = './data/'
 train = pd.read_csv(foldername + 'train.csv')
 # print out the data
 print(train)
 
-
-# # Problem 2. ModelOps (14 pts)
-
-# ## Problem 2.1 Minimum Viable Product (MVP) (14 pts)
-
-# ### (a1) [1 pt] Download Model: ResNet18
-
-
-
-import torch
-import torchvision.models as models
 model = models.resnet18()
-
-
-# ### (a2) [1 pt] Model surgery: change the last linear layer to predict one number instead
-
-
-import torch.nn as nn
 model.fc = nn.Linear(512, 6)
 
-
-# ### (b) [1 pt] Define loss: Mean-squared error (MSE/L2 regression)
-
-
-
-import torch.nn.functional as F
 def criterion(y_gt, y_pred):
     return F.mse_loss(y_gt/100, torch.sigmoid(y_pred))
 
-
-# ### (c) [1 pt] Define the optimizer
-
-
-import torch.optim as optim
 
 # freeze the weight for all conv layers
 # only learn the last linear layer
@@ -56,12 +34,7 @@ for name,param in model.named_parameters():
 # Hint: copy it from pset 4
 optimizer = optim.SGD(model.parameters(), lr=1e-3)
 
-
-# ### (d1) [1 pt] Divide the images into train and validation
-
-
 # from lab3
-import numpy as np
 np.random.seed(123)
 
 def data_split(N, ratio=[8,2]):
@@ -87,11 +60,6 @@ df_train = pd.read_csv(foldername + 'train.csv')
 df_test = pd.read_csv(foldername + 'test.csv')
 df_valid = pd.read_csv(foldername + 'val.csv')
 
-
-# ### (d2) [3 pts] Build dataset class
-
-from torch.utils.data import Dataset
-from PIL import Image
 
 metadata_cols = train.columns[1:-1]
  
@@ -146,12 +114,6 @@ class TrashDataSet(Dataset):
 
         return img, target
 
-
-# ### (d3) [1 pt] Build data transform
-
-
-from torchvision import transforms
-
 RGB_MEAN = (0.4914, 0.4822, 0.4465)
 RGB_STD = (0.2023, 0.1994, 0.2010)
 
@@ -166,33 +128,13 @@ transform_train = transforms.Compose([
 ])
 
 transform_test = transforms.Compose([
-    #### TODO
-    # hint: there are many "right" ways to do it
-    # one idea is to take the center crop without randomflip, compared to transform_train
     transforms.CenterCrop(10),
     transforms.ToTensor(),
 ])
 
-
-# ### (d4) [1 pt] Build Dataset
-
-
-
-from torch.utils.data import DataLoader
-
 train_dataset = TrashDataSet(foldername + 'train/', df_train, transforms=transform_train)
 
-#### TODO
 valid_dataset = TrashDataSet(foldername + 'train/', df_valid, transforms = transform_test)
-
-
-# ### (e) [3 pts] Train it!
-# 
-# To get the point, you need to show that the loss is decreasing after a few epoches. As you experienced in Pset4, here is where you will find out potential bugs in your anwsers to previous questions.
-
-
-
-#### nothing to change in this code block ####
 
 class Config:  
   def __init__(self, **kwargs):
@@ -300,34 +242,34 @@ class Trainer:
 
 
 # Let's kick off the training and hope it works!
-
-# set of hyperparameters
-train_config = Config(    
-    criterion = criterion,
-    save_model_path = '', # if you like, use your google drive path to save the model (mount google drive first)
-    log_interval = 100, # display after number of batches
-    batch_size = 16,
-    optimizer = optimizer,
-    epochs = 10,
-)
-Trainer(model, train_config, train_dataset, valid_dataset).main()
-
-
-# ### (f) [1 pt] Create a submission
-# You'll get the point if the code blocks below run through correctly.
+if __name__ == '__main__':
+  # set of hyperparameters
+  train_config = Config(    
+      criterion = criterion,
+      save_model_path = '', # if you like, use your google drive path to save the model (mount google drive first)
+      log_interval = 100, # display after number of batches
+      batch_size = 16,
+      optimizer = optimizer,
+      epochs = 10,
+  )
+  Trainer(model, train_config, train_dataset, valid_dataset).main()
 
 
-df_test = pd.read_csv(foldername + 'test.csv')
-test_dataset = TrashDataSet(foldername + 'test/', df_test, transforms=transform_test)
-
-test_config = Config(mode='deploy', batch_size=8)
-test_pred = Trainer(model, test_config, None, test_dataset).main()
+  # ### (f) [1 pt] Create a submission
+  # You'll get the point if the code blocks below run through correctly.
 
 
-# submission_df = pd.read_csv(foldername + 'sample_submission.csv')
-# submission_df['class'] = test_pred.ravel()
-# submission_df.to_csv('submission.csv', index = False)
+  df_test = pd.read_csv(foldername + 'test.csv')
+  test_dataset = TrashDataSet(foldername + 'test/', df_test, transforms=transform_test)
 
-# Summary
-# submission_df.head(10)
+  test_config = Config(mode='deploy', batch_size=8)
+  test_pred = Trainer(model, test_config, None, test_dataset).main()
+
+
+  # submission_df = pd.read_csv(foldername + 'sample_submission.csv')
+  # submission_df['class'] = test_pred.ravel()
+  # submission_df.to_csv('submission.csv', index = False)
+
+  # Summary
+  # submission_df.head(10)
 
