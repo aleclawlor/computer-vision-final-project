@@ -2,14 +2,41 @@ import cv2
 import random
 from cv_utilities import get_bounding_boxes, blur_background
 from flask import Flask, render_template, Response
-import matplotlib.pyplot as plt 
 import time 
+import torch
+import torchvision.models as models
+import numpy as np
+
+from torch import nn
+
+
+CLASSES = [    
+    "glass",
+    "paper",
+    "cardboard",
+    "plastic",
+    "metal",
+    "trash"]
+COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
 app = Flask(__name__)
 
 vid = cv2.VideoCapture(0)
 marginHorizontal = 160
 marginVertical = 100
+
+def getObject(frame):
+    model = models.resnet18()
+    model.fc = nn.Linear(512,6)
+    model.load_state_dict(torch.load("model.pth"))
+
+    model.eval()
+    with torch.no_grad():
+        pred = model(frame.unsqueeze(0))
+        predicted = CLASSES[pred[0].argmax(0)]
+    return predicted
+
+
 
 # a function to continuously run camera loop and get frames
 def run_camera_loop():
@@ -41,7 +68,8 @@ def run_camera_loop():
             x2, y2 = width - marginHorizontal, height - marginVertical
 
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, 'Place Item Here', (x1, y1 - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+            object = getObject(frame)
+            cv2.putText(frame, object, (x1, y1 - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
             ret, buffer = cv2.imencode('.jpg', frame)
 
