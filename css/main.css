@@ -1,0 +1,6 @@
+#videoContainer{
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    background-color: red;
+}
