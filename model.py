@@ -66,9 +66,15 @@ from torchvision import transforms
 RGB_MEAN = (0.4914, 0.4822, 0.4465)
 RGB_STD = (0.2023, 0.1994, 0.2010)
 
+<<<<<<< HEAD
 df_train = pd.read_csv('./data_augmented/train.csv')
 df_train = df_train.sample(frac=1)
 df_test = pd.read_csv('./data_augmented/test.csv')
+=======
+df_train = pd.read_csv('./data/train.csv')
+df_train = df_train.sample(frac=1)
+df_test = pd.read_csv('./data/test.csv')
+>>>>>>> 1dca02c50d4bed21a6a441416188d7cac61d37d6
 df_test = df_test.sample(frac=1)
 print(df_test)
 
