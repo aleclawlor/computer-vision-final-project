@@ -8,7 +8,8 @@ import torchvision.models as models
 import numpy as np
 
 from torch import nn
-
+from torchvision import transforms
+from PIL import Image
 
 CLASSES = [    
     "glass",
@@ -25,16 +26,29 @@ vid = cv2.VideoCapture(0)
 marginHorizontal = 160
 marginVertical = 100
 
-def getObject(frame):
-    model = models.resnet18()
-    model.fc = nn.Linear(512,6)
-    model.load_state_dict(torch.load("model.pth"))
+model = models.resnet18()
+model.fc = nn.Linear(512,6)
+model.load_state_dict(torch.load("model.pth"))
+model.eval()
 
-    model.eval()
+data_transforms = transforms.Compose([
+    transforms.Resize(256),
+    transforms.ToTensor()
+])
+
+def getObject(frame):
+    
+    global model, CLASSES, data_transforms
+
     with torch.no_grad():
+
+        frame = Image.fromarray(frame)
+        frame = data_transforms(frame)
+        frame = frame.float()
         pred = model(frame.unsqueeze(0))
+        print("Prediction: ", pred)
         predicted = CLASSES[pred[0].argmax(0)]
-    return predicted
+        return predicted
 
 
 
@@ -68,7 +82,11 @@ def run_camera_loop():
             x2, y2 = width - marginHorizontal, height - marginVertical
 
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            object = getObject(frame)
+
+            frame_crop=frame[y1:y2, x1:x2]
+            frame_crop= blur_background(frame_crop)
+
+            object = getObject(frame_crop)
             cv2.putText(frame, object, (x1, y1 - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
             ret, buffer = cv2.imencode('.jpg', frame)
