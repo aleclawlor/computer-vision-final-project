@@ -5,6 +5,11 @@ To use this repository download the source code. To run the main program, naviga
 There are two datasets available to train the model. If you want to use the more accurate model which utlizes images that have been augmented from the TrashNet source, run the file model.py.
 If you want to use the raw images provided by TrashNet, run the command unzip images.zip -d ./data and run the command python3 model.py
 
+Commands:
+
+'python main.py' : run the Flask application 
+'python model.py' : train the ResNet50 model 
+'python augment.py' : augment the original dataset
 
 Anna Bolger:
 •Configuration of ResNet18 Model
